@@ -9,7 +9,7 @@ const { REDIS_CONF } = require('../config/db')
 // 创建客户端 ---              接收两个参数一个是端口，一个是主机
 const redisClient = redis.createClient(REDIS_CONF.port, REDIS_CONF.host)
 redisClient.on('error', err => {
-    console.error('redis error', err);
+    console.error('redis error', err)
 })
 
 
