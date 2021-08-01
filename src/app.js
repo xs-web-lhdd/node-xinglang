@@ -10,11 +10,23 @@ const session = require('koa-generic-session')
 const redisStore = require('koa-redis')
 // 引入配置
 const { REDIS_CONF } = require('./config/db')
+// 引入环境
+const { isProd } = require('./untils/env')
+
+// 路由
 const index = require('./routes/index')
 const users = require('./routes/users')
+const errorViewRouter = require('./routes/view/error')
 
 // error handler
-onerror(app)
+let onerrorConf = {}
+if (isProd) {
+    // 生产环境就跳到错误页，如果是开发环境将错误暴露出来方便改bug
+    onerrorConf = {
+        redirect: '/error'  // 遇到错误时就跳转到错误页（重定向）
+    }
+}
+onerror(app, onerrorConf)
 
 // middlewares
 app.use(bodyparser({
@@ -55,6 +67,7 @@ app.use(session({
 // routes
 app.use(index.routes(), index.allowedMethods())
 app.use(users.routes(), users.allowedMethods())
+app.use(errorViewRouter.routes(), errorViewRouter.allowedMethods()) // 注册的时候包含404的路由一定要写到最下面，声明的时候可以写到前面
 
 // error-handling
 app.on('error', (err, ctx) => {
