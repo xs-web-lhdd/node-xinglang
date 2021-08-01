@@ -2,10 +2,10 @@
 * @description sequelize同步
 * @author 凉风有信、
 */
-const sql = require('./sql')
+const seq = require('./seq')
 
-// const { User } = require('./modle');
-const seq = require('./sql')
+const { User } = require('./model/index')
+// const seq = require('./sql')
 
 
 // 测试连接
