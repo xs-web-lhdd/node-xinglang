@@ -16,11 +16,9 @@ async function getUserInfo(userName, password) {
     const whereOpt = {
         userName
     }
-
     if (password) {
         Object.assign(whereOpt, { password })
     }
-
     // 查询
     const result = await User.findOne({
         attributes: ['id', 'userName', 'nikename', 'picture', 'city'],
@@ -30,14 +28,30 @@ async function getUserInfo(userName, password) {
         // 未找到
         return result
     }
-
     // 格式化处理
     const formatRes = formatUser(result.dataValues)
-
-    
     return formatRes
 }
 
+
+/**
+ * 
+ * @param {string} userName 用户名
+ * @param {string} password 密码
+ * @param {string} gender 性别
+ * @param {string} nikename 昵称
+ */
+async function createUser({ userName, password, gender = 3, nikename }) {
+    const result = await User.create({
+        userName,
+        password,
+        nikename : nikename ? nikename : userName,
+        gender
+    })
+    return result.dataValues
+}
+
 module.exports = {
-    getUserInfo
+    getUserInfo,
+    createUser
 }
