@@ -10,8 +10,7 @@ router.get('/bar', function (ctx, next) {
   ctx.body = 'this is a users/bar response'
 })
 
-<<<<<<< HEAD
-=======
+
 // 动态路由---由params得到动态参数
 router.get('/:username', function (ctx, next) {
   const { username } = ctx.params
@@ -41,5 +40,4 @@ router.post('/login', async (ctx, next) => {
   }
 })
 
->>>>>>> dad563316d53037f13a23006a9ffd376b077032f
 module.exports = router

@@ -1,9 +1,5 @@
 {
-<<<<<<< HEAD
   "name": "koa2-weibo-code",
-=======
-  "name": "weibo-code",
->>>>>>> dad563316d53037f13a23006a9ffd376b077032f
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -18,17 +14,15 @@
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
     "koa-convert": "^1.2.0",
+    "koa-generic-session": "^2.1.1",
     "koa-json": "^2.0.2",
     "koa-logger": "^3.2.0",
     "koa-onerror": "^4.1.0",
+    "koa-redis": "^4.0.1",
     "koa-router": "^7.4.0",
     "koa-static": "^5.0.0",
-<<<<<<< HEAD
     "koa-views": "^6.2.0",
     "redis": "^3.1.2"
-=======
-    "koa-views": "^6.2.0"
->>>>>>> dad563316d53037f13a23006a9ffd376b077032f
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
