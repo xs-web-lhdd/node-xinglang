@@ -5,6 +5,7 @@
 
 const { getUserInfo, createUser } = require('../services/user')
 const { SuccessModel, ErrorModel } = require('../model/ResModel')
+const { doCrypto } = require('../untils/cryp')
 const { 
     userMsgNotExist, userMsgExist, registerFail 
 } = require('../model/ErrorInfo')
@@ -38,7 +39,11 @@ async function register({ userName, password, gender }) {
     }
     // 实现注册 service
     try {
-        await createUser({ userName, password, gender })
+        await createUser({
+            userName,
+            password: doCrypto(password),
+            gender
+        })
         return new SuccessModel()
     } catch (ex) {
         console.error(ex.message, ex.stack)

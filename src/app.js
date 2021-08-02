@@ -12,6 +12,8 @@ const redisStore = require('koa-redis')
 const { REDIS_CONF } = require('./config/db')
 // 引入环境
 const { isProd } = require('./untils/env')
+// 引入密钥
+const { SESSION_SECRECT_KEY } = require('./config/secrectkeys')
 
 // 路由
 const index = require('./routes/index')
@@ -42,7 +44,7 @@ app.use(views(__dirname + '/views', {
 }))
 
 // session配置
-app.keys = ['huCdd^^*232*&']
+app.keys = [SESSION_SECRECT_KEY] // 密钥
 // session如果不用的时候不会往redis里面塞数据和设置cookie
 app.use(session({
     key: 'weibo.sid',   // cookie name 默认是 'koa.sid'
