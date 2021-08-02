@@ -14,9 +14,11 @@ const { REDIS_CONF } = require('./config/db')
 const { isProd } = require('./untils/env')
 // 引入密钥
 const { SESSION_SECRECT_KEY } = require('./config/secrectkeys')
+const path = require('path')
 
 // 路由
 const index = require('./routes/index')
+const utilsApiRouter = require('./routes/api/utils')
 const userViewRouter = require('./routes/view/user')
 const userApiRouter = require('./routes/api/user')
 const errorViewRouter = require('./routes/view/error')
@@ -38,6 +40,7 @@ app.use(bodyparser({
 app.use(json())
 app.use(logger())
 app.use(require('koa-static')(__dirname + '/public'))
+app.use(require('koa-static')(path.join(__dirname, '..', 'uploadfiles'))) // 标准路径拼接
 
 app.use(views(__dirname + '/views', {
     extension: 'ejs'
@@ -69,6 +72,7 @@ app.use(session({
 
 // routes
 app.use(index.routes(), index.allowedMethods())
+app.use(utilsApiRouter.routes(), utilsApiRouter.allowedMethods())
 app.use(userViewRouter.routes(), userViewRouter.allowedMethods())
 app.use(userApiRouter.routes(), userApiRouter.allowedMethods())
 app.use(errorViewRouter.routes(), errorViewRouter.allowedMethods()) // 注册的时候包含404的路由一定要写到最下面，声明的时候可以写到前面

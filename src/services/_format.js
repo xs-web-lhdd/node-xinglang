@@ -10,6 +10,7 @@ const { DEFAULT_PICTURE } = require('../config/constants')
  * @param {Object} obj 用户对象 
  */
 function _formatUserPicture(obj) {
+    console.log(DEFAULT_PICTURE)
     if (obj.picture === null ) {
         obj.picture = DEFAULT_PICTURE
     }

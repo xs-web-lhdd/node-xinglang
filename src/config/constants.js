@@ -4,5 +4,5 @@
  */
 
 module.exports = {
-    DEFAULT_PICTURE: 'https://i0.hdslb.com/bfs/face/member/noface.jpg@96w_96h_1c_1s.webp'
+    DEFAULT_PICTURE: 'http://www.dell-lee.com/imgs/vue3/near.png'
 }
