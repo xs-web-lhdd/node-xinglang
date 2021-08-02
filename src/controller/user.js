@@ -7,14 +7,13 @@ const { getUserInfo, createUser } = require('../services/user')
 const { SuccessModel, ErrorModel } = require('../model/ResModel')
 const { doCrypto } = require('../untils/cryp')
 const { 
-    userMsgNotExist, userMsgExist, registerFail 
+    userMsgNotExist, userMsgExist, registerFail, loginFailInfo
 } = require('../model/ErrorInfo')
 /**
  * 用户名是否存在
  * @param {string} userName 用户名
  */
 async function isExist(userName) {
-    // 业务逻辑处理
     // 调用service获取数据
     const userInfo = await getUserInfo(userName)
     if (userInfo) {
@@ -27,7 +26,7 @@ async function isExist(userName) {
 }
 
 /**
- * 
+ * 注册函数
  * @param {string} userName 用户名
  * @param {string} password 密码
  * @param {number} gender 性别（1是男 2是女 三是保密）
@@ -52,7 +51,29 @@ async function register({ userName, password, gender }) {
 
 }
 
+/**
+ * 登录函数
+ * @param {Object} ctx koa ctx信息
+ * @param {string} userName 用户名
+ * @param {string} password 密码
+ */
+async function login({ ctx, userName, password }) {
+    // 获取用户信息
+    const userInfo = await getUserInfo(userName, doCrypto(password))
+    if (!userInfo) {
+        // 登陆失败
+        return new ErrorModel(loginFailInfo)
+    }
+
+    // 登录成功
+    if (ctx.session.userInfo === null) {
+        ctx.session.userInfo = userInfo
+    }
+    return new SuccessModel()
+}
+
 module.exports = {
     isExist,
-    register
+    register,
+    login
 }
