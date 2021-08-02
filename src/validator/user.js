@@ -4,7 +4,7 @@
  */
 
 const validate = require('./_validator')
-// 校验规则
+// 用户校验规则
 const SCHEMA = {
     type: 'object',
     properties: {
