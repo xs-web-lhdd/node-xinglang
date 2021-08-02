@@ -66,9 +66,10 @@ async function login({ ctx, userName, password }) {
     }
 
     // 登录成功
-    if (ctx.session.userInfo === null) {
-        ctx.session.userInfo = userInfo
-    }
+    // if (ctx.session.userInfo === null) {
+    ctx.session.userInfo = userInfo
+    console.log(ctx.session.userInfo.userName)
+    // }
     return new SuccessModel()
 }
 
