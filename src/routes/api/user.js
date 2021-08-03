@@ -29,7 +29,7 @@ router.post('/login', async (ctx, next) => {
 })
 
 // 修改个人信息
-router.patch('/changeInfo', async (ctx, next) => {
+router.patch('/changeInfo', loginCheck, genValidator(userValidate), async (ctx, next) => {
     const { nikename, city, picture } = ctx.request.body
     ctx.body = await changerInfo(ctx, {nikename, city, picture})
 })
