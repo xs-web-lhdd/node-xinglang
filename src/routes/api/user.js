@@ -10,7 +10,7 @@ const { genValidator } = require('../../middlewares/validator')
 const { loginCheck } = require('../../middlewares/loginChecks')
 router.prefix('/api/user')
 
-// 注册路由
+// 注册用户
 router.post('/register', genValidator(userValidate), async (ctx, next) => {
     const { userName, password, gender } = ctx.request.body
     ctx.body = await register({ userName, password, gender })
