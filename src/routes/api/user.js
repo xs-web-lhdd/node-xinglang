@@ -4,7 +4,7 @@
  */
 
 const router = require('koa-router')()
-const { isExist, register, login, changerInfo } = require('../../controller/user')
+const { isExist, register, login, changerInfo, changePassword } = require('../../controller/user')
 const { userValidate } = require('../../validator/user')
 const { genValidator } = require('../../middlewares/validator')
 const { loginCheck } = require('../../middlewares/loginChecks')
@@ -34,4 +34,11 @@ router.patch('/changeInfo', loginCheck, genValidator(userValidate), async (ctx, 
     ctx.body = await changerInfo(ctx, {nikename, city, picture})
 })
 
+
+// 修改密码
+router.patch('/changePassword', loginCheck, genValidator(userValidate), async (ctx, next) => {
+    const { password, newPassword } = ctx.request.body
+    const { userName } = ctx.session.userInfo
+    ctx.body = await changePassword(userName, password, newPassword)
+})
 module.exports = router

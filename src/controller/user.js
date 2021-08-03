@@ -7,7 +7,8 @@ const { getUserInfo, createUser, updateUser } = require('../services/user')
 const { SuccessModel, ErrorModel } = require('../model/ResModel')
 const { doCrypto } = require('../untils/cryp')
 const { 
-    userMsgNotExist, userMsgExist, registerFail, loginFailInfo, changeInfoFailInfo
+    userMsgNotExist, userMsgExist, registerFail, loginFailInfo, changeInfoFailInfo,
+    changePasswordFailInfo
 } = require('../model/ErrorInfo')
 /**
  * 用户名是否存在
@@ -104,10 +105,33 @@ async function changerInfo(ctx, {nikename, city, picture}) {
     return new ErrorModel(changeInfoFailInfo)
 }
 
+/**
+ * 更改用户密码
+ * @param {string} userName 用户名
+ * @param {string} password 密码
+ * @param {string} newPassword 新密码
+ */
+async function changePassword(userName ,password, newPassword) {
+    const result = await updateUser(
+        {
+            newPassword: doCrypto(newPassword)
+        },
+        {
+            userName,
+            password: doCrypto(password)
+        }
+    )
+    if (result) {
+        // 执行成果
+        return new SuccessModel()
+    }
+    return new ErrorModel(changePasswordFailInfo)
+}
 
 module.exports = {
     isExist,
     register,
     login,
-    changerInfo
+    changerInfo,
+    changePassword
 }
