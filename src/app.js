@@ -14,10 +14,12 @@ const { REDIS_CONF } = require('./config/db')
 const { isProd } = require('./untils/env')
 // 引入密钥
 const { SESSION_SECRECT_KEY } = require('./config/secrectkeys')
+// 标准引入路径
 const path = require('path')
 
 // 路由
-const index = require('./routes/index')
+const blogHomeApiRouter = require('./routes/api/blog-home')
+const blogViewRouter = require('./routes/view/blog')
 const utilsApiRouter = require('./routes/api/utils')
 const userViewRouter = require('./routes/view/user')
 const userApiRouter = require('./routes/api/user')
@@ -71,7 +73,8 @@ app.use(session({
 // })
 
 // routes
-app.use(index.routes(), index.allowedMethods())
+app.use(blogHomeApiRouter.routes(), blogHomeApiRouter.allowedMethods())
+app.use(blogViewRouter.routes(), blogViewRouter.allowedMethods())
 app.use(utilsApiRouter.routes(), utilsApiRouter.allowedMethods())
 app.use(userViewRouter.routes(), userViewRouter.allowedMethods())
 app.use(userApiRouter.routes(), userApiRouter.allowedMethods())
