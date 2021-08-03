@@ -85,12 +85,12 @@ $(function() {
     var $inputCity = $('#input-city')
     $('#btn-submit-info').click(function(e) {
         e.preventDefault()
-        var nickName = $inputNick.val()
+        var nikeName = $inputNick.val()
         var city = $inputCity.val()
         var picture = $imgPicture.attr('src')
 
         ajax.patch('/api/user/changeInfo', {
-            nickName,
+            nikeName,
             city,
             picture
         }, function(err, data) {

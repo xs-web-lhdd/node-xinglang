@@ -3,11 +3,11 @@
  * @author 凉风有信、
  */
 
-const { getUserInfo, createUser } = require('../services/user')
+const { getUserInfo, createUser, updateUser } = require('../services/user')
 const { SuccessModel, ErrorModel } = require('../model/ResModel')
 const { doCrypto } = require('../untils/cryp')
 const { 
-    userMsgNotExist, userMsgExist, registerFail, loginFailInfo
+    userMsgNotExist, userMsgExist, registerFail, loginFailInfo, changeInfoFailInfo
 } = require('../model/ErrorInfo')
 /**
  * 用户名是否存在
@@ -72,8 +72,42 @@ async function login({ ctx, userName, password }) {
     return new SuccessModel()
 }
 
+/**
+ * 修改基本信息
+ * @param {Object} ctx ctx
+ * @param {string} nikename 昵称
+ * @param {string} city 城市
+ * @param {string} picture 头像
+ */
+async function changerInfo(ctx, {nikename, city, picture}) {
+    const { userName } = ctx.session.userInfo
+    // serivce修改
+    const result = await updateUser(
+        {
+            newCity: city,
+            newNikename: nikename,
+            newPicture: picture
+        },
+        {
+            userName
+        }
+    )
+    if (result) {
+        // 执行成功
+        Object.assign(ctx.session.userInfo, {
+            nikename,
+            city,
+            picture
+        })
+        return new SuccessModel()
+    }
+    return new ErrorModel(changeInfoFailInfo)
+}
+
+
 module.exports = {
     isExist,
     register,
-    login
+    login,
+    changerInfo
 }

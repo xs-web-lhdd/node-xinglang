@@ -51,7 +51,44 @@ async function createUser({ userName, password, gender = 3, nikename }) {
     return result.dataValues
 }
 
+/**
+ * 更新用户信息
+ * @param {Object} param0 要修改的内容 {newPassword, newCity, newPicture, newNikename}
+ * @param {Object} param1 要查询的条件 {userName, password}
+ */
+async function updateUser({newPassword, newCity, newPicture, newNikename}, {userName, password}) {
+    // 拼接修改内容
+    const updateData = {}
+    if (newPassword) {
+        updateData.password = newPassword
+    }
+    if (newCity) {
+        updateData.city = newCity
+    }
+    if (newPicture) {
+        updateData.picture = newPicture
+    }
+    if (newNikename) {
+        updateData.nikename = newNikename
+    }
+    // 拼接查询条件
+    const whereData = {
+        userName
+    }
+    if (password) {
+        whereData.password = password
+    }
+    // 修改
+    const result = await User.update(updateData, {
+        where: whereData
+    })
+    // 修改成功行数为 1 就会代表修改成功
+    return result[0] > 0
+}
+
+
 module.exports = {
     getUserInfo,
-    createUser
+    createUser,
+    updateUser
 }
