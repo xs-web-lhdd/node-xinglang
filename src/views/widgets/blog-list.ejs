@@ -10,7 +10,7 @@
             <a href="/profile/<%= blog.user.userName%>">
                 <%= blog.user.nikeName%>
             </a>:
-            <span><%- blog.contentFormat%></span>
+            <span><%= blog.content%></span>
         </div>
         <div class="info">
             <span><%= blog.createdAtFormat%></span>
@@ -20,7 +20,7 @@
             <a href="#" class="blog-list-reply"
                 data-content="<%= blog.content%>"
                 data-userName="<%= blog.user.userName%>"
-                data-nickName="<%= blog.user.nickName%>"
+                data-nickName="<%= blog.user.nikeName%>"
             >
                 <i class="fa fa-mail-reply"></i> 回复
             </a>
@@ -54,10 +54,10 @@ $(function () {
         // 获取内容和用户
         var content = $target.attr('data-content')
         var userName = $target.attr('data-userName')
-        var nickName = $target.attr('data-nickName')
+        var nikeName = $target.attr('data-nickName')
 
         // 设置内容并获取焦点
-        $textContent.val(' // @' + nickName + ' - ' + userName + ' : ' + content)
+        $textContent.val(' // @' + nikeName + ' - ' + userName + ' : ' + content)
         setCursor($textContent[0], 0, 0)
     })
 })

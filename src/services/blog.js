@@ -3,7 +3,7 @@
  * @author 凉风有信、
  */
 
-const { Blog } = require('../db/model/index')
+const { Blog, User } = require('../db/model/index')
 
 /**
  * 创建微博
@@ -41,7 +41,7 @@ async function getBlogListByUser(
         include: [
             {
                 model: User,
-                attributes: ['userName', 'nickName', 'picture'],
+                attributes: ['userName', 'nikeName', 'picture'],
                 where: userWhereOpts
             }
         ]
@@ -50,15 +50,16 @@ async function getBlogListByUser(
     // result.rows 查询结果，数组
 
     // 获取 dataValues
+    console.log('================', result)
     let blogList = result.rows.map(row => row.dataValues)
 
     // 格式化
-    blogList = formatBlog(blogList)
-    blogList = blogList.map(blogItem => {
-        const user = blogItem.user.dataValues
-        blogItem.user = formatUser(user)
-        return blogItem
-    })
+    // blogList = formatBlog(blogList)
+    // blogList = blogList.map(blogItem => {
+    //     const user = blogItem.user.dataValues
+    //     blogItem.user = formatUser(user)
+    //     return blogItem
+    // })
 
     return {
         count: result.count,
