@@ -12,12 +12,15 @@ const { getProfileBlogList } = require('../../controller/blog-profile')
 const { getBlogListString } = require('../../untils/blog')
 
 // 加载更多
-router.get('/loadMore/:userName/:pageIndex', loginCheck, async () => {
-    const { userName, pageIndex } = ctx.params
+router.get('/loadMore/:userName/:pageIndex', loginCheck, async (ctx, next) => {
+    let { userName, pageIndex } = ctx.params
+    console.log(pageIndex)
     pageIndex = parseInt(pageIndex)
     const result = await getProfileBlogList(userName, pageIndex)
     // 渲染为html字符串
     result.data.blogListTpl = getBlogListString(result.data.blogList)
+    // 返回
+    ctx.body = result
 })
 
 

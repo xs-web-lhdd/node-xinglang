@@ -5,5 +5,5 @@
 
 module.exports = {
     DEFAULT_PICTURE: 'http://www.dell-lee.com/imgs/vue3/near.png',
-    PAGE_SIZE: 10
+    PAGE_SIZE: 5
 }
