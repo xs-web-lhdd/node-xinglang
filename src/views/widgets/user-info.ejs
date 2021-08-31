@@ -13,9 +13,9 @@
 <% } else { %>
     <%# 不是当前登录用户%>
     <p class="margin-top-10">
-        <button>关注/取消关注</button>
-        <!-- <button id="btn-un-follow" class="btn btn-light" style="display: none;">取消关注</button>
-        <button id="btn-follow" class="btn btn-primary" style="display: none;">关注</button> -->
+        <!-- <button>关注/取消关注</button> -->
+        <button id="btn-un-follow" class="btn btn-light" style="display: none;">取消关注</button>
+        <button id="btn-follow" class="btn btn-primary" style="display: none;">关注</button>
     </p>
 <% } %>
 
@@ -29,11 +29,11 @@ $(function () {
     var $btnUnFollow = $('#btn-un-follow')
     if (<%= !isMe%>) {
         // 不是当前用户，则显示“关注”或者“取消关注”
-        // if (<%= locals.amIFollowed%>) {
-        //     $btnUnFollow.show()
-        // } else {
-        //     $btnFollow.show()
-        // }
+        if (<%= locals.amIFollowed%>) {
+            $btnUnFollow.show()
+        } else {
+            $btnFollow.show()
+        }
     }
 
     // 关注此人
