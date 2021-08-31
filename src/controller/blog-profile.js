@@ -18,7 +18,7 @@ async function getProfileBlogList(userName, pageIndex = 0) {
         pageIndex,
         pageSize: PAGE_SIZE
     })
-    console.log(result)
+    // console.log(result)
     const blogList = result.blogList
  
     // 拼接返回数据
