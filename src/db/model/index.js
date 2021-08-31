@@ -22,6 +22,12 @@ User.hasMany(UserRelation, {
     foreignKey: 'userId'
 })
 
+// 首页---外键连接
+Blog.belongsTo(UserRelation, {
+    foreignKey: 'userId',
+    targetKey: 'followerId'
+})
+
 module.exports = {
     User,
     Blog,
