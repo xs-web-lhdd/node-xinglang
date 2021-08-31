@@ -52,10 +52,10 @@
 
             <!-- 关注 -->
             <%- include('widgets/followers', {
-                <!-- count: userData.followersData.count, -->
-                count: 0,
-                userList: [],
-                <!-- userList: userData.followersData.list -->
+                count: userData.followersData.count,
+                <!-- count: 0, -->
+                <!-- userList: [], -->
+                userList: userData.followersData.list
             })%>
 
         </div> <!-- 右侧结束 -->
