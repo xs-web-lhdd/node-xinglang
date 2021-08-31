@@ -3,8 +3,9 @@
  * @author 凉风有信、
  */
 
-const { Blog, User } = require('../db/model/index')
+const { Blog, User, UserRelation } = require('../db/model/index')
 const { formatUser } = require('./_format')
+const { PAGE_SIZE } = require('../config/constants')
 
 /**
  * 创建微博
@@ -66,8 +67,44 @@ async function getBlogListByUser(
     }
 }
 
+/**
+ * 获取关注着的微博
+ * @param {*} param0 查询条件
+ */
+async function getFollowerBlogList ({userId, pageIndex=0, pageSize = PAGE_SIZE}) {
+    const result = await Blog.findAndCountAll({
+        limit: pageSize,
+        offset: pageSize * pageIndex,
+        order: [
+            ['id', 'desc']
+        ],
+        include: [
+            {
+                model: User,
+                attributes: ['userName', 'nikeName', 'picture']
+            },
+            {
+                model: UserRelation,
+                attributes: ['userId', 'followerId'],
+                where: { userId }
+            }
+        ]
+    })
+    // 格式化
+    let blogList = result.rows.map(row => row.dataValues)
+    blogList = blogList.map(item => {
+        item.user = formatUser(item.user.dataValues)
+        return item
+    })
+
+    return {
+        count: result.count,
+        blogList
+    }
+}
 
 module.exports = {
     createBlog,
-    getBlogListByUser
+    getBlogListByUser,
+    getFollowerBlogList
 }
