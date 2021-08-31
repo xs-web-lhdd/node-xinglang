@@ -42,6 +42,14 @@
                 });%>
             </div>
 
+            <!-- 粉丝 -->
+            <%- include('widgets/fans', {
+                count: userData.fansData.count,
+                <!-- count: 0, -->
+                userList: userData.fansData.list
+                <!-- userList: [] -->
+            })%>
+
         </div> <!-- 右侧结束 -->
     </div>
 </div>
