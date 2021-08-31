@@ -8,6 +8,7 @@ router.prefix('/api/profile')
 
 const { loginCheck } = require('../../middlewares/loginChecks')
 const { getProfileBlogList } = require('../../controller/blog-profile')
+const { follow, unfollow } = require('../../controller/user-relation')
 // 将微博列表替换为字符串
 const { getBlogListString } = require('../../untils/blog')
 
@@ -23,6 +24,19 @@ router.get('/loadMore/:userName/:pageIndex', loginCheck, async (ctx, next) => {
     ctx.body = result
 })
 
+// 关注和取消关注
+router.post('/follow', loginCheck, async (ctx, next) => {
+    const { id: myUserId } = ctx.session.userInfo
+    const { userId: curUserId } = ctx.request.body
+    // controller
+    ctx.body = follow(myUserId, curUserId)
+})
+router.post('/unfollow', loginCheck, async (ctx, next) => {
+    const { id: myUserId } = ctx.session.userInfo
+    const { userId: curUserId } = ctx.request.body
+    // controller
+    ctx.body = unfollow(myUserId, curUserId)
+})
 
 
 module.exports = router
