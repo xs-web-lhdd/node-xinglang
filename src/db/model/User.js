@@ -17,7 +17,7 @@ const User = seq.define('user', {
     password: {
         type: STRING,
         allowNull: false,
-        commit: '密码'
+        comment: '密码'
     },
     nikename: {
         type: STRING,

@@ -18,7 +18,6 @@ router.get('/profile', loginRedirect, async (ctx, next) => {
     ctx.redirect(`/profile/${userName}`)
 })
 router.get('/profile/:userName', loginRedirect, async (ctx, next) => {
-    // 获取微博第一页数据
 
     // 已登录用户的信息
     const myUserInfo = ctx.session.userInfo
@@ -40,12 +39,8 @@ router.get('/profile/:userName', loginRedirect, async (ctx, next) => {
         // 用户名存在
         curUserInfo = existResult.data
     }
-    // const { userName: curUserName } = ctx.params
     const res = await getProfileBlogList(curUserName, 0)
-    console.log(res)
     const { isEmpty, blogList, pageSize, pageIndex, count } = res.data
-    console.log('blogList===>>>>>>>', blogList)
-    console.log(isEmpty)
     await ctx.render('profile', {
         blogData: {
             isEmpty, blogList, pageSize, pageIndex, count

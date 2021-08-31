@@ -4,6 +4,7 @@
  */
 
 const { Blog, User } = require('../db/model/index')
+const { formatUser } = require('./_format')
 
 /**
  * 创建微博
@@ -50,16 +51,14 @@ async function getBlogListByUser(
     // result.rows 查询结果，数组
 
     // 获取 dataValues
-    console.log('================', result)
     let blogList = result.rows.map(row => row.dataValues)
 
-    // 格式化
-    // blogList = formatBlog(blogList)
-    // blogList = blogList.map(blogItem => {
-    //     const user = blogItem.user.dataValues
-    //     blogItem.user = formatUser(user)
-    //     return blogItem
-    // })
+    // 格式化---博客列表里面具有用户信息，带上用户并添加上默认头像
+    blogList = blogList.map(blogItem => {
+        const user = blogItem.user.dataValues
+        blogItem.user = formatUser(user)
+        return blogItem
+    })
 
     return {
         count: result.count,

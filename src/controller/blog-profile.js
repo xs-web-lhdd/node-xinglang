@@ -4,7 +4,7 @@
  */
 
 const { getBlogListByUser } = require('../services/blog')
-// const { PAGE_SIZE } = require('../conf/constant')
+const { PAGE_SIZE } = require('../config/constants')
 const { SuccessModel } = require('../model/ResModel')
  
 /**
@@ -16,8 +16,7 @@ async function getProfileBlogList(userName, pageIndex = 0) {
     const result = await getBlogListByUser({
         userName,
         pageIndex,
-        pageSize: 0
-        // pageSize: PAGE_SIZE
+        pageSize: PAGE_SIZE
     })
     console.log(result)
     const blogList = result.blogList
@@ -26,8 +25,7 @@ async function getProfileBlogList(userName, pageIndex = 0) {
     return new SuccessModel({
         isEmpty: blogList.length === 0,
         blogList,
-        pageSize: 0,
-        // pageSize: PAGE_SIZE,
+        pageSize: PAGE_SIZE,
         pageIndex,
         count: result.count
     })
