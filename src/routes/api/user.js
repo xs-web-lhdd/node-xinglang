@@ -8,6 +8,7 @@ const { isExist, register, login, changerInfo, changePassword, logout } = requir
 const { userValidate } = require('../../validator/user')
 const { genValidator } = require('../../middlewares/validator')
 const { loginCheck } = require('../../middlewares/loginChecks')
+const { getFollowers } = require('../../controller/user-relation')
 router.prefix('/api/user')
 
 // 注册用户
@@ -46,6 +47,17 @@ router.patch('/changePassword', loginCheck, genValidator(userValidate), async (c
 // 退出登录
 router.post('/logout', loginCheck, async (ctx, next) => {
     ctx.body = await logout(ctx)
+})
+
+// 做at列表，即关注人列表
+router.get('/getAtList', loginCheck, async (ctx, next) => {
+    const { id: userId } = ctx.session.userInfo
+    const result = await getFollowers(userId)
+    const { userList } = result.data
+    list = userList.map(user => {
+        return `${user.nikeName}-${user.userName}`
+    })
+    ctx.body = list
 })
 
 
