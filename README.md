@@ -554,3 +554,423 @@ npm install eslint babel-eslint --save-dev
 ***
 
 ### Node.js+Koa+Sequelize仿新浪微博：
+
+#### 项目起步准备：
+
+##### 技术方案设计：
+
+- 架构设计
+- 页面（模板，路由）和API设计
+- 数据模型设计
+##### 整体架构设计：
+![](https://i.loli.net/2021/09/02/vAKigCoYuyBrM6z.png)
+
+##### API：
+```bash
+/api/user/register	注册
+/api/user/isExist   用户名是否存在
+/api/user/login 	登录
+/api/user/changeInfo修改用户信息
+/api/utils/upload   图片上传
+/api/user/changePassword修改密码
+/api/user/logout	退出登录
+/api/blog/create    创建微博
+/api/blog/loadMore/:pageIndex加载更多
+/api/profile/follow 关注
+/api/profile/unFollow取消关注
+```
+##### 关系型数据库三大范式：
+规则：
+- 属性的原子性： 每一列都不可再拆解
+
+- 记录的唯一性：有唯一标识（主键），其他属性都依赖于主键
+
+- 字段的冗余性：不存在数据冗余和传递依赖（引用数据而不是拷贝数据）
+  好处：
+
+- 数据规范严谨，不易出错
+
+- 占用空间更小
+
+- 访问速度更快
+
+  ![](https://i.loli.net/2021/09/02/kNle8AghJ5O9jiE.png)
+***
+#### 用户管理：
+
+sequelize数据类型统一：
+```js
+/**
+ * @description 封装sequelize数据类型
+ * @author 凉风有信、
+ */
+
+const Sequelize = require('sequelize')
+
+module.exports = {
+    STRING: Sequelize.STRING,
+    DECIMAL: Sequelize.DECIMAL,
+    TEXT: Sequelize.TEXT,
+    INTEGER: Sequelize.INTEGER,
+    BOOLEAN: Sequelize.BOOLEAN
+}
+```
+
+##### 用户的数据模型：
+
+```js
+const seq = require('../seq')
+
+const { STRING, DECIMAL } = require('../types')
+// users
+const User = seq.define('user', {
+    userName: {
+        type: STRING,
+        allowNull: false,
+        unique: true,
+        comment: '用户名唯一'
+    },
+    password: {
+        type: STRING,
+        allowNull: false,
+        comment: '密码'
+    },
+    nikename: {
+        type: STRING,
+        allowNull: false,
+        comment: '昵称'
+    },
+    gender: {
+        type: DECIMAL,
+        allowNull: false,
+        defaultValue: 3,
+        comment: '性别（1是男性 2是女性 3是保密）'
+    },
+    picture: {
+        type: STRING,
+        comment: '头像存图片地址'
+    },
+    city: {
+        type: STRING,
+        comment: '城市'
+    }
+})
+
+module.exports = User
+```
+
+##### 统一的返回格式：
+
+```js
+/**
+ * @description response 数据模型
+ * @author 凉风有信、
+ */
+
+/**
+ * 基础模块
+ */
+class BaseModel {
+    constructor({error, data, message}) {
+        this.error = error
+        if (data) {
+            this.data = data
+        }
+        if (message) {
+            this.message = message
+        }
+    }
+}
+
+/**
+ * 成功的数据模型
+ */
+class SuccessModel extends BaseModel{
+    constructor(data = {}) {
+        super({
+            error: 0,
+            data
+        }) 
+    }
+}
+
+/**
+ * 失败数据模型
+ */
+class ErrorModel extends BaseModel {
+    constructor({ error, message }) {
+        super({
+            error,
+            message
+        })
+    }
+}
+
+module.exports = {
+    SuccessModel,
+    ErrorModel
+}
+```
+也可参考：https://github.com/xs-web-lhdd/jingdong/tree/server/src/res-models
+				   https://github.com/xs-web-lhdd/manager/blob/master-server/utils/util.js
+
+##### 统一错误码：
+
+```js
+module.exports = {
+    // 用户信息已存在
+    userMsgExist: {
+        error: 10001,
+        message: '用户名已存在'
+    },
+    // 注册失败
+    registerFail: {
+        error: 10002,
+        message: '注册失败'
+    },
+    // 用户名不存在
+    userMsgNotExist: {
+        error: 10003,
+        message: '用户名不存在'
+    },
+    // 登录失败
+    loginFailInfo: {
+        error: 10004,
+        message: '登录失败，用户名或密码错误'
+    },
+    // 未登录
+    loginCheckFailInfo: {
+        error: 10005,
+        message: '您尚未登录'
+    },
+    // 修改密码失败
+    changePasswordFailInfo: {
+        error: 10006,
+        message: '修改密码失败，请重试'
+    },
+    // 上传文件过大
+    uploadFileSizeFailInfo: {
+        error: 10007,
+        message: '上传文件尺寸过大'
+    },
+    // 修改基本信息失败
+    changeInfoFailInfo: {
+        error: 10008,
+        message: '修改基本信息失败'
+    },
+    // json schema 校验失败
+    jsonSchemaFileInfo: {
+        error: 10009,
+        message: '数据格式校验错误'
+    },
+    // 删除用户失败
+    deleteUserFailInfo: {
+        error: 10010,
+        message: '删除用户失败'
+    },
+    // 添加关注失败
+    addFollowerFailInfo: {
+        error: 10011,
+        message: '添加关注失败'
+    },
+    // 取消关注失败
+    deleteFollowerFailInfo: {
+        error: 10012,
+        message: '取消关注失败'
+    },
+    // 创建微博失败
+    createBlogFailInfo: {
+        error: 11001,
+        message: '创建微博失败，请重试'
+    },
+    // 删除微博失败
+    deleteBlogFailInfo: {
+        error: 11002,
+        message: '删除微博失败，请重试'
+    }
+}
+```
+
+##### 密码加密：
+```js
+/**
+ * @description 加密方法
+ * @author 凉风有信、
+ */
+
+const crypto = require('crypto')
+
+// 密钥
+const { CRYPTO_SECRECT_KEY } = require('../config/secrectkeys')
+
+
+/**
+ * md5加密
+ * @param {string} content 明文
+ */
+function _md5(content) {
+    const md5 = crypto.createHash('md5')
+    return md5.update(content).digest('hex')
+}
+
+/**
+ * 加密
+ * @param {string} content 明文 
+ */
+function doCrypto(content) {
+    const str = `password=${content}&key=${CRYPTO_SECRECT_KEY}`
+    return _md5(str)
+}
+
+module.exports = {
+    doCrypto
+}
+```
+##### 校验：
+安装ajv：
+```bash
+npm install ajv --save
+```
+官网地址： https://www.npmjs.com/package/ajv
+###### ajv校验使用：
+```js
+const Ajv = require('ajv')
+const ajv = new Ajv({
+    // allErrors: true     // 输出所有错误（所有错误找全后返回）---比较慢
+})
+
+/**
+ * 
+ * @param {Object} schema json schema规则
+ * @param {Object} data 待校验的数据
+ */
+function validate(schema, data = {}) {
+    const valid = ajv.validate(schema, data)
+    if (!valid) {
+        return ajv.errors[0]
+    }
+}
+
+module.exports = validate
+```
+#### 用户设置：
+##### 图片上传：
+安装依赖：
+```bash
+npm install formidable-upload-koa --save
+```
+npm官网： https://www.npmjs.com/package/formidable-upload-koa
+
+项目中代码演示：
+
+```js
+/**
+ * @description utils 路由
+ * @author 凉风有信、
+ */
+
+const router = require('koa-router')()
+const koaForm = require('formidable-upload-koa')
+const { loginCheck } = require('../../middlewares/loginChecks')
+const { saveFile } = require('../../controller/utils')
+router.prefix('/api/utils')
+
+// 上传图片
+router.post('/upload',loginCheck, koaForm(), async (ctx, next) => {
+    const file = ctx.req.files['file'] // 在ctx.req.files里获取到上传的文件，['file']是前端input上传文件组件的name属性值
+    const { size, path, name, type } = file
+    // controller
+    ctx.body = await saveFile({
+        name,
+        filePath: path,
+        size,
+        type
+    })
+})
+
+module.exports = router
+```
+
+一些网友的博客： 
+
+- https://blog.csdn.net/ojb98K/article/details/107590088
+- https://blog.csdn.net/qq_39197547/article/details/81316856
+
+##### 文件移动：
+
+安装依赖：
+```bash
+npm install fs-extra --save
+```
+npm官网：https://www.npmjs.com/package/fs-extra
+使用举例：
+```js
+const fse = require('fs-extra') // 引入fse
+
+// 删除文件
+await fse.remove(filePath) // 涉及到对文件的操作就是对IO的操作，就要使用异步
+// 移动文件---第一个参数是文件原本的地址，第二个参数是文件移动后的地址
+await fse.move(filePath, distFilePath)
+```
+一些用法介绍的博客：
+
+- https://juejin.cn/post/6844903641594216455
+- https://blog.csdn.net/LUCKWXF/article/details/104209022
+- https://www.jianshu.com/p/d6990a03d610
+- https://javascript.shop/2016/08/nodejs-file-methods-fs-extra
+
+项目中保存文件的具体代码：
+
+```js
+const path = require('path')
+const { ErrorModel, SuccessModel } = require('../model/ResModel')
+const { uploadFileSizeFailInfo } = require('../model/ErrorInfo')
+const fse = require('fs-extra')
+const { exists } = require('fs')
+
+// 文件存储目录
+const DIST_FOLDER_PATH = path.join(__dirname, '..', '..', 'uploadfiles')
+// 文件最大体积是1M
+const MAX_SIZE = 1024 * 1024 * 1024
+
+
+// 判断是否有文件目录
+fse.pathExists(DIST_FOLDER_PATH).then(exist => {
+    if (!exist) {
+        // 如果目录不存在就创建一个目录
+        fse.ensureDir(DIST_FOLDER_PATH)
+    }
+})
+
+/**
+ * 保存文件
+ * @param {string} name 文件名称
+ * @param {string} type 文件类型 
+ * @param {number} size 文件大小
+ * @param {string} filePath 文件路径
+ */
+async function saveFile({ size, name, filePath, type }) {
+    if (size > MAX_SIZE) {
+        // 删除文件后再返回错误
+        await fse.remove(filePath)
+        return new ErrorModel(uploadFileSizeFailInfo)
+    }
+
+    // 移动文件
+    const fileName = Date.now() + '.' + name // 使用时间戳防止重名
+    const distFilePath = path.join(DIST_FOLDER_PATH, fileName) // 文件目的地
+    await fse.move(filePath, distFilePath)
+
+    // 返回信息
+    return new SuccessModel({
+        url: '/' + fileName
+    })
+}
+
+module.exports = {
+    saveFile
+}
+
+```
+在上面代码中把**uploadfiles**这个文件夹做成静态文件目录可以被访问，**记得要在app.js中进行设置**：`app.use(require('koa-static')(path.join(__dirname, '..', 'uploadfiles'))) // 标准路径拼接`
+
