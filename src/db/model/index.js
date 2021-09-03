@@ -7,6 +7,7 @@
 const User = require('./User')
 const Blog = require('./Blog')
 const UserRelation = require('./UserRelation')
+const AtRelation = require('./AtRelation')
 
 // 创建外键
 Blog.belongsTo(User, {
@@ -28,8 +29,14 @@ Blog.belongsTo(UserRelation, {
     targetKey: 'followerId'
 })
 
+// atMe---外键链接
+Blog.hasMany(AtRelation, {
+    foreignKey: 'blogId'
+})
+
 module.exports = {
     User,
     Blog,
-    UserRelation
+    UserRelation,
+    AtRelation
 }
