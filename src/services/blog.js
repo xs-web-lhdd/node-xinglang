@@ -4,7 +4,7 @@
  */
 
 const { Blog, User, UserRelation } = require('../db/model/index')
-const { formatUser } = require('./_format')
+const { formatUser, formatBlog } = require('./_format')
 const { PAGE_SIZE } = require('../config/constants')
 
 /**
@@ -53,7 +53,7 @@ async function getBlogListByUser(
 
     // 获取 dataValues
     let blogList = result.rows.map(row => row.dataValues)
-
+    blogList = formatBlog(blogList)
     // 格式化---博客列表里面具有用户信息，带上用户并添加上默认头像
     blogList = blogList.map(blogItem => {
         const user = blogItem.user.dataValues
@@ -92,6 +92,7 @@ async function getFollowerBlogList ({userId, pageIndex=0, pageSize = PAGE_SIZE})
     })
     // 格式化
     let blogList = result.rows.map(row => row.dataValues)
+    blogList = formatBlog(blogList)
     blogList = blogList.map(item => {
         item.user = formatUser(item.user.dataValues)
         return item

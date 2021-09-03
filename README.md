@@ -896,6 +896,7 @@ module.exports = router
 - https://blog.csdn.net/ojb98K/article/details/107590088
 - https://blog.csdn.net/qq_39197547/article/details/81316856
 
+***
 ##### 文件移动：
 
 安装依赖：
@@ -973,4 +974,169 @@ module.exports = {
 
 ```
 在上面代码中把**uploadfiles**这个文件夹做成静态文件目录可以被访问，**记得要在app.js中进行设置**：`app.use(require('koa-static')(path.join(__dirname, '..', 'uploadfiles'))) // 标准路径拼接`
+***
 
+##### 预防XSS攻击：
+###### 安装XSS：
+```bash
+npm install xss --save
+```
+使用举例：
+```js
+const xss = require('xss') // 引入
+
+// 使用：
+content = xss(content)
+```
+***
+
+##### **关注关系：**重难点！！！
+   在数据模型里面userId是关注人，followerId是被关注人，比如userId是张三，followId是李四，那么他们之间的关系就是张三关注李四，如果张三又关注了王五，那么就会又一个新的列里面userId就是张三，followId是王五，这样查找张三的关注列表直接去userRelation中查找userId是张三列就可以了，同理，如果想查找张三的粉丝列表那就去userRelation中查找followerId是张三的就可以了，要是还是理解不了就去mysql的可视化数据中查询全部userrelations自然就会明白！！！
+
+###### 代码演示：
+
+```js
+const { User, UserRelation } = require('../db/model/index')
+const { formatUser } = require('./_format')
+const Sequelize = require('sequelize')
+
+/**
+ * 获取粉丝列表
+ * @param {string} followerId 
+ */
+// 比如查询我的粉丝，那就是去userrealtion表中查询followId中有我的所有列，查询出来的是userId的数组，由于在外键定义时是User在前，因此先查询User再查询userrelation。
+async function getUserByFollower (followerId) {
+    const result = await User.findAndCountAll({
+        attributes: ['id', 'nikeName', 'userName', 'picture'],
+        order: [
+            ['id', 'desc']
+        ],
+        include: [
+            {
+                model: UserRelation,
+                where: { // 因为followId在UserRealtion这个表下面，所以查询的时候条件要写在UserRelation下面
+                    followerId,
+                    userId: {
+                        [Sequelize.Op.ne]: followerId
+                    }
+                }
+            }
+        ]
+    })
+    // result.count 是查询总数
+    // result.rows 是查询结果、数组
+    
+    // 格式化
+    let userList = result.rows.map(row => row.dataValues)
+    userList = formatUser(userList)
+
+    return {
+        count: result.count,
+        userList
+    }
+}
+
+/**
+ * 获取关注人列表
+ * @param {*} userId 
+ */
+// 把userId当作我的用户Id，那么用我的用户Id去userrelation中查找userId是我的用户Id的所有的表，查询出来的是followId的数组，因为followId外键连接User表中的每一列的id，所以顺带把用户信息查询出来（id, nikeName, userName, picture
+async function getFollowersByUser (userId) {
+    const result = await UserRelation.findAndCountAll({
+        order: [
+            ['id', 'desc']
+        ],
+        include: [
+            {
+                model: User,
+                attributes: ['id', 'nikeName', 'userName', 'picture']
+            }
+        ],
+        where: {// 这个查询也是查询UserRelation这个表，因此条件是写在这里，不能写在include里面的User下面
+            userId,
+            followerId: {
+                [Sequelize.Op.ne]: userId // followId不等于userId
+            }
+        }
+    })
+
+    // 格式化
+    let userList = result.rows.map(row => row.dataValues)
+    userList = userList.map(item => {
+        let user = item.user.dataValues
+        user = formatUser(user)
+        return user
+    })
+
+    return {
+        count: result.count, // 查询出来的总数
+        userList
+    }
+}
+```
+
+> 这里where条件的位置取决于在那个表中查找（查找粉丝和查找关注人都是在userrelation中查找，但第一种是先找User后找userrelation，因此where在include中，第二中先找userRelation后找User，因此where在include外边），attribute的位置取决于查找时返回谁的数据（返回的都是User的信息，因此第一种User先查找，所以attribute在include外边，第二种User后查找，因此attribute跟User一级，在include里边）
+
+***
+
+#### 首页自己微博和关注人微博：三表查询（比较难理解）
+##### 建立外键：
+```js
+// Blog的userId连接UserRelation中的followerId，不写targetKey默认就是id，写了就以写的为准
+Blog.belongsTo(UserRelation, {
+    foreignKey: 'userId',
+    targetKey: 'followerId'
+})
+// 在这里数据库可视化工具中可能不会显示这个外键关系，但是并不影响数据模型之间的联系也不影响我们连表查询
+```
+##### 自己关注自己：牛逼操作！！！
+自己关注自己可能让大家有点迷离，其实这是简化查询的一个很妙的操作，在这个项目中首页需要获取自己的微博和关注人的微博，如果分开查询关注人的微博和自己的微博那样相对比较麻烦，可以通过自己关注自己简化操作：自己关注自己，那么首页只需要获取关注人的微博即可（里面含有自己的微博），这样首页获取微博的操作就会简化许多，但是这样做还有两个bug需要处理，一是首页关注人列表里面会有自己，二十自己粉丝列表种会有自己，解决这两个bug的解决方案是：在查询用户的粉丝列表和关注人列表的时候让userId和followerId不相等即可：
+```js
+// 获取粉丝列表：通过附加条件筛选出自己关注自己的那一列
+userId: {
+    [Sequelize.Op.ne]: followerId // 注意userId和followerId顺序别弄反了
+}
+// 获取关注人列表：
+followerId: {
+    [Sequelize.Op.ne]: userId // followId不等于userId
+}
+```
+##### 三表查询：
+查询关注人的微博：
+```js
+/**
+ * 获取关注着的微博
+ * @param {*} param0 查询条件
+ */
+async function getFollowerBlogList ({userId, pageIndex=0, pageSize = PAGE_SIZE}) {
+    const result = await Blog.findAndCountAll({
+        limit: pageSize,
+        offset: pageSize * pageIndex,
+        order: [
+            ['id', 'desc']
+        ],
+        include: [
+            {
+                model: User,
+                attributes: ['userName', 'nikeName', 'picture']
+            },
+            {
+                model: UserRelation,
+                attributes: ['userId', 'followerId'],
+                where: { userId }
+            }
+        ]
+    })
+    // 格式化
+    let blogList = result.rows.map(row => row.dataValues)
+    blogList = blogList.map(item => {
+        item.user = formatUser(item.user.dataValues)
+        return item
+    })
+
+    return {
+        count: result.count,
+        blogList
+    }
+}
+```
